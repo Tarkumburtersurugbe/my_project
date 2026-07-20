@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Student Voting Portal</title>
+  <style>
+      :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --accent: #7c3aed;
+      --warning: #ca8a04;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-image: url('background.svg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .hidden { display: none !important; }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { opacity: 0.9; }
+
+    .portal-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+
+    .auth-card {
+      background: var(--surface);
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+    }
+
+    .auth-card h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .auth-card p {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-student { background: #dbeafe; color: var(--primary); }
+    .badge-admin { background: #fee2e2; color: var(--danger); }
+
+    .workspace-container {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 73px);
+    }
+
+    sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .nav-item:hover, .nav-item.active {
+      background: #f1f5f9;
+      color: var(--primary);
+    }
+
+    main { padding: 32px; }
+
+    .status-banner {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .status-banner.info { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; }
+    .status-banner.success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+
+    .candidate-deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .candidate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .candidate-card h3 { margin-bottom: 4px; }
+    .candidate-card .dept { color: var(--text-muted); margin-bottom: 16px; }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .metric-card h3 { color: var(--text-muted); margin-bottom: 8px; }
+    .metric-card .value { font-size: 28px; font-weight: 700; }
+
+    .data-table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: #f8fafc; color: var(--text-muted); text-transform: uppercase; font-size: 12px; }
+
+    @media (max-width: 768px) {
+      .workspace-container { grid-template-columns: 1fr; }
+      sidebar { display: none; }
+      header { padding: 16px 20px; }
+      main { padding: 20px; }
+    } 
+  </style>
+</head>
+<body>
+  <div id="authPortal" class="portal-gate">
+    <div class="auth-card">
+      <h1>
+        <span class="brand-logo" aria-hidden="true">☑</span>
+        Campus Vote Hub
+      </h1>
+      <p>Secure Matric Number Authentication</p>
+
+      <div class="form-group">
+        <label>Access Context Role</label>
+        <select id="authRole" onchange="handleRoleScopeChange()">
+          <option value="student">Student Voter</option>
+          <option value="admin">System Administrator</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="idInputGroup">
+        <label for="voterUID">Student Matric Number</label>
+        <input id="voterUID" type="text" placeholder="Enter your matric number" />
+      </div>
+
+      <div class="form-group hidden" id="passInputGroup">
+        <label for="adminKey">Administrator Clearance Key</label>
+        <input id="adminKey" type="password" placeholder="Enter admin key" />
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="authenticateIdentity()">Authorize Access Session</button>
+    </div>
+  </div>
+
+  <div id="appArchitecture" class="hidden">
+    <header>
+      <div class="app-brand">
+        <span class="brand-logo" aria-hidden="true">☑</span>
+        <h2>Campus Vote Hub</h2>
+      </div>
+      <div class="user-profile">
+        <span id="roleBadge" class="badge">Role</span>
+        <span id="sessionDisplayID" style="font-weight:600;">ID</span>
+        <button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="terminateSession()">Terminate</button>
+      </div>
+    </header>
+
+    <div class="workspace-container">
+      <sidebar>
+        <ul class="nav-menu" id="dynamicMenu"></ul>
+      </sidebar>
+
+      <main>
+        <section id="viewportBallot" class="hidden">
+          <div id="ballotStatusBanner" class="status-banner"></div>
+          <h2 style="margin-bottom:24px;">Executive Office Presidential Ballot</h2>
+          <div class="candidate-deck" id="ballotDeck"></div>
+        </section>
+
+        <section id="viewportResults" class="hidden">
+          <div id="resultsStatusBanner" class="status-banner info">Election returns are compiled live.</div>
+          <h2 style="margin-bottom:8px;">Live Audit Returns</h2>
+          <p style="color:var(--text-muted); margin-bottom:24px;">Realtime structural computational breakdown of validated submissions</p>
+          <div class="analytics-grid" id="resultsAnalyticsGrid"></div>
+        </section>
+
+        <section id="viewportAdminOverview" class="hidden">
+          <h2 style="margin-bottom:24px;">Administrative Infrastructure</h2>
+          <div class="analytics-grid">
+            <div class="metric-card">
+              <h3>Total Verified Submissions</h3>
+              <div class="value" id="metricTotalVotes">0</div>
+            </div>
+            <div class="metric-card">
+              <h3>Registered Candidates</h3>
+              <div class="value" id="metricTotalCandidates">0</div>
+            </div>
+            <div class="metric-card">
+              <h3>Global Returns Status</h3>
+              <div class="value" id="metricSystemStatus" style="color:var(--success)">Active</div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:12px;">
+            <h3>Candidate Roster Registry</h3>
+            <button class="btn btn-primary" onclick="launchCandidateProvisioner()">Provision Candidate</button>
+          </div>
+
+          <div class="data-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidate Name</th>
+                  <th>Faculty Domain Assignment</th>
+                  <th>Current Tallied Returns</th>
+                </tr>
+              </thead>
+              <tbody id="adminCandidateTableBody"></tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top:32px;">Audit Log File System</h3>
+          <div class="data-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Voter Global ID</th>
+                  <th>Compilation Timestamp</th>
+                  <th>System Verification Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminVoterLogBody"></tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:32px; padding:24px; background:#fee2e2; border-radius:12px; border:1px solid #fca5a5;">
+            <h4 style="color:var(--danger); margin-bottom:8px;">Emergency Infrastructure Operations</h4>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Purges entire runtime database state arrays from LocalStorage. Action cannot be reversed.</p>
+            <button class="btn btn-danger" onclick="purgeInfrastructureDatabase()">Purge Systems Database State</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let candidates = JSON.parse(localStorage.getItem('db_candidates')) || [
+      { id: 'cand-1', name: 'Ugbe Timothy', dept: 'Faculty of Computing & AI', votes: 0 },
+      { id: 'cand-2', name: 'Jane Smith', dept: 'Faculty of Engineering', votes: 0 },
+      { id: 'cand-3', name: 'Michael James', dept: 'Faculty of Arts', votes: 0 }
+    ];
+
+    let auditLogs = JSON.parse(localStorage.getItem('db_audit_logs')) || [];
+    let sessionState = { activeUser: null, activeRole: null };
+
+    function handleRoleScopeChange() {
+      const role = document.getElementById('authRole').value;
+      const idInputGroup = document.getElementById('idInputGroup');
+      const passInputGroup = document.getElementById('passInputGroup');
+
+      if (!idInputGroup || !passInputGroup) return;
+      if (role === 'admin') {
+        idInputGroup.classList.add('hidden');
+        passInputGroup.classList.remove('hidden');
+      } else {
+        idInputGroup.classList.remove('hidden');
+        passInputGroup.classList.add('hidden');
+      }
+    }
+
+    function normalizeStudentMatric(input) {
+      return input
+        .trim()
+        .toUpperCase()
+        .replace(/^[A-Z]+[-\s]*/, '')
+        .replace(/[^A-Z0-9-]/g, '')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function authenticateIdentity() {
+      const role = document.getElementById('authRole').value;
+
+      if (role === 'admin') {
+        const masterKey = document.getElementById('adminKey').value;
+        if (masterKey === 'admin123') {
+          sessionState.activeUser = 'SYS-ADMIN-01';
+          sessionState.activeRole = 'admin';
+        } else {
+          alert('Security execution exception: Invalid clearance key');
+          return;
+        }
+      } else {
+        const uid = normalizeStudentMatric(document.getElementById('voterUID').value);
+        if (!uid) {
+          alert('Authentication parameter initialization error: Matric number required');
+          return;
+        }
+        sessionState.activeUser = uid;
+        sessionState.activeRole = 'student';
+      }
+
+      document.getElementById('authPortal').classList.add('hidden');
+      document.getElementById('appArchitecture').classList.remove('hidden');
+      initializeWorkspaceEnvironment();
+    }
+
+    function terminateSession() {
+      sessionState = { activeUser: null, activeRole: null };
+      document.getElementById('voterUID').value = '';
+      document.getElementById('adminKey').value = '';
+      document.getElementById('appArchitecture').classList.add('hidden');
+      document.getElementById('authPortal').classList.remove('hidden');
+    }
+
+    function initializeWorkspaceEnvironment() {
+      document.getElementById('sessionDisplayID').textContent = sessionState.activeUser;
+      const badge = document.getElementById('roleBadge');
+      badge.textContent = sessionState.activeRole;
+      badge.className = `badge badge-${sessionState.activeRole}`;
+
+      const menu = document.getElementById('dynamicMenu');
+      menu.innerHTML = '';
+
+      if (sessionState.activeRole === 'student') {
+        menu.innerHTML += `<li class="nav-item active" onclick="switchViewport('viewportBallot', this)">Ballot Box Interface</li>`;
+        menu.innerHTML += `<li class="nav-item" onclick="switchViewport('viewportResults', this)">Live Metric Matrix</li>`;
+        switchViewport('viewportBallot', menu.querySelector('.nav-item'));
+      } else if (sessionState.activeRole === 'admin') {
+        menu.innerHTML += `<li class="nav-item active" onclick="switchViewport('viewportAdminOverview', this)">Admin Control Center</li>`;
+        menu.innerHTML += `<li class="nav-item" onclick="switchViewport('viewportResults', this)">Live Metric Matrix</li>`;
+        switchViewport('viewportAdminOverview', menu.querySelector('.nav-item'));
+      }
+
+      synchronizeStateInterface();
+    }
+
+    function switchViewport(targetViewportId, element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+
+      document.getElementById('viewportBallot').classList.add('hidden');
+      document.getElementById('viewportResults').classList.add('hidden');
+      document.getElementById('viewportAdminOverview').classList.add('hidden');
+      document.getElementById(targetViewportId).classList.remove('hidden');
+    }
+
+    function commitGlobalState() {
+      localStorage.setItem('db_candidates', JSON.stringify(candidates));
+      localStorage.setItem('db_audit_logs', JSON.stringify(auditLogs));
+      synchronizeStateInterface();
+    }
+
+    function synchronizeStateInterface() {
+      const hasVoted = auditLogs.some(log => log.voterId === sessionState.activeUser);
+
+      const ballotBanner = document.getElementById('ballotStatusBanner');
+      const ballotDeck = document.getElementById('ballotDeck');
+      ballotDeck.innerHTML = '';
+
+      if (hasVoted) {
+        ballotBanner.className = 'status-banner success';
+        ballotBanner.textContent = 'Identity Record Verified: Your secure transaction token has been signed and processed.';
+      } else {
+        ballotBanner.className = 'status-banner info';
+        ballotBanner.textContent = 'Open Portal Status: Select candidate below to commit your final single choice election vote.';
+      }
+
+      candidates.forEach(cand => {
+        const card = document.createElement('div');
+        card.className = 'candidate-card';
+        card.innerHTML = `
+          <h3>${cand.name}</h3>
+          <div class="dept">${cand.dept}</div>
+          ${hasVoted ? '' : `<button class="btn btn-success" onclick="castSecureVote('${cand.id}')">Submit Ballot Vote</button>`}
+        `;
+        ballotDeck.appendChild(card);
+      });
+
+      const resultsGrid = document.getElementById('resultsAnalyticsGrid');
+      resultsGrid.innerHTML = '';
+      candidates.forEach(cand => {
+        resultsGrid.innerHTML += `
+          <div class="metric-card">
+            <h3>${cand.name}</h3>
+            <div class="value">${cand.votes} <span style="font-size:14px; color:var(--text-muted)">votes</span></div>
+          </div>
+        `;
+      });
+
+      document.getElementById('metricTotalVotes').textContent = auditLogs.length;
+      document.getElementById('metricTotalCandidates').textContent = candidates.length;
+
+      const adminTableBody = document.getElementById('adminCandidateTableBody');
+      adminTableBody.innerHTML = '';
+      candidates.forEach(cand => {
+        adminTableBody.innerHTML += `
+          <tr>
+            <td><strong>${cand.name}</strong></td>
+            <td>${cand.dept}</td>
+            <td><span class="badge badge-student" style="font-size:13px">${cand.votes}</span></td>
+          </tr>
+        `;
+      });
+
+      const adminLogBody = document.getElementById('adminVoterLogBody');
+      adminLogBody.innerHTML = '';
+      auditLogs.slice().reverse().forEach(log => {
+        adminLogBody.innerHTML += `
+          <tr>
+            <td><code>${log.voterId}</code></td>
+            <td>${log.timestamp}</td>
+            <td><span style="color:var(--success); font-weight:600;">✓ Verified</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    function castSecureVote(candidateUUID) {
+      const hasVoted = auditLogs.some(log => log.voterId === sessionState.activeUser);
+      if (hasVoted) {
+        alert('Transaction Exception: Double-spending identity tokens prohibited.');
+        return;
+      }
+
+      const target = candidates.find(c => c.id === candidateUUID);
+      if (target) {
+        target.votes++;
+        auditLogs.push({
+          voterId: sessionState.activeUser,
+          timestamp: new Date().toLocaleString(),
+          targetPool: candidateUUID
+        });
+
+        commitGlobalState();
+        alert('Success: Secure transaction processed and committed to audit log arrays.');
+
+        const resultsTab = document.querySelectorAll('.nav-item')[1];
+        switchViewport('viewportResults', resultsTab);
+      }
+    }
+
+    function launchCandidateProvisioner() {
+      const name = prompt('Enter Candidate Full Legal Name:');
+      if (!name) return;
+      const dept = prompt('Enter Academic Domain/Faculty Assignment:');
+      if (!dept) return;
+
+      const newId = `cand-${Date.now()}`;
+      candidates.push({ id: newId, name, dept, votes: 0 });
+      commitGlobalState();
+    }
+
+    function purgeInfrastructureDatabase() {
+      if (confirm('System Alert: You are initializing a full systems payload purge. Proceed?')) {
+        localStorage.removeItem('db_candidates');
+        localStorage.removeItem('db_audit_logs');
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
